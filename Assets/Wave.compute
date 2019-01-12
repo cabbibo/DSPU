@@ -1,0 +1,51 @@
+﻿// Each #kernel tells which function to compile; you can have many kernels
+#pragma kernel wave
+
+
+float _Time;
+
+
+int _Count;
+float sampleRate = 44100;
+float _BaseTime;
+
+
+// 1 value
+RWStructuredBuffer<float> _AudioBuffer;
+
+int _AudioBuffer_COUNT;
+
+int safeID( int id , int max ){
+    return clamp( id , 0 , max );
+}
+
+
+#define NR_THREADS 128
+
+[numthreads(NR_THREADS,1,1)]
+void wave( uint threadID : SV_GroupIndex, uint3 u3GroupID : SV_GroupID, uint3 id : SV_DispatchThreadID) {
+
+  int pID = threadID + u3GroupID * NR_THREADS;
+ //_OutBuffer[_NumObjects+1] = float4(0,0,0,0);
+ if( pID < _AudioBuffer_COUNT ){
+    pID = safeID( pID , _AudioBuffer_COUNT);
+
+    float fTime = _BaseTime + float(pID)/44100;
+    float tau = 6.28;
+
+
+    float f = 0;
+
+    for( int i = 0; i < 4; i++){
+      float o = float(i)/4;
+      f += cos( tau*( 440  * fTime + 400 * o*sin(o*tau*fTime )/tau ));
+    }
+    f /= 4;
+
+    _AudioBuffer[pID] = f;//sin(float(pID));
+
+  }
+
+
+  
+}
