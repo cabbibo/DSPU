@@ -169,7 +169,6 @@ public AudioClip clip;
             normalizedTime = timeInClip / length;
 
 
-            print( finished );
             if( normalizedTime >= 1 ){
                 finished = true;
                 return 0;
