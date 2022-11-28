@@ -86,8 +86,8 @@ public class ProceduralClip : MonoBehaviour {
           d = second3[timeIndex];
         }
 
-        data[i]   = d;//CreateSine();
-        data[i+1] = d;//CreateSine();
+        data[i]   = d;;
+        data[i+1] = d;;
         
         timeIndex ++;
         if( timeIndex == samplerate){
@@ -96,7 +96,6 @@ public class ProceduralClip : MonoBehaviour {
           secondAudio %= 3;
         }
 
-       // timeIndex %= samplerate;
       }
 
       timeAudio = (float)timeIndex / (float)samplerate;
@@ -114,10 +113,13 @@ public class ProceduralClip : MonoBehaviour {
 //      print( timeFixed );
       
       if( timeFixed > 1 ){ 
+
         timeFixed-=1;
         startTime += 1;
+        
         secondFixed ++;
         secondFixed %=3;
+        
         baseTime ++;
 
         life.shader.SetFloat("_BaseTime",baseTime);
@@ -125,43 +127,17 @@ public class ProceduralClip : MonoBehaviour {
 
         if(secondFixed == 0 ){
           form._buffer.GetData(second1);
-          for( int i = 0; i < 100; i++ ){
-            print( second1[i]);
-          }
         }else if( secondFixed == 1 ){
           form._buffer.GetData(second2);
         }else if( secondFixed == 2 ){
           form._buffer.GetData(second3);
         }
 
-/*
-              if( secondFixed == 0 ){
-        for( int i = 0; i < samplerate; i++){
-          float t = baseTime + ((float)i/(float)samplerate); 
-          second1[i] = getVal(t); 
-        }
-      }else if( secondFixed == 1 ){
-        for( int i = 0; i < samplerate; i++){
-          float t = baseTime + ((float)i/(float)samplerate); 
-          second2[i] = getVal(t); 
-        }
-      }else if( secondFixed == 2 ){
-        for( int i = 0; i < samplerate; i++){
-          float t = baseTime + ((float)i/(float)samplerate); 
-          second3[i] = getVal( t );//Mathf.Sin( t * 2 * Mathf.PI * frequency ); 
-        }
-      }*/
-
       }
 
 
 
 
-    }
-
-
-    float getVal(float t){
-      return Mathf.Cos(2*Mathf.PI*( frequency*t + 40*Mathf.Sin(2*Mathf.PI*t)/(2 * Mathf.PI) ));
     }
 
 }

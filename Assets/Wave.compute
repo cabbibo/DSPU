@@ -9,6 +9,8 @@ int _Count;
 float sampleRate = 44100;
 float _BaseTime;
 
+float _Frequency;
+
 
 // 1 value
 RWStructuredBuffer<float> _AudioBuffer;
@@ -30,15 +32,16 @@ void wave( uint threadID : SV_GroupIndex, uint3 u3GroupID : SV_GroupID, uint3 id
  if( pID < _AudioBuffer_COUNT ){
     pID = safeID( pID , _AudioBuffer_COUNT);
 
+    // fills all the samples at the same time
     float fTime = _BaseTime + float(pID)/44100;
     float tau = 6.28;
 
 
     float f = 0;
 
-    for( int i = 0; i < 4; i++){
-      float o = float(i)/4;
-      f += cos( tau*( 440  * fTime + 400 * o*sin(o*tau*fTime )/tau ));
+    for( int i = 0; i < 1; i++){
+      float o = float(i+1)/2;
+      f += cos( tau*( _Frequency  * fTime + _Frequency * o*sin(o*tau*fTime )/tau ));
     }
     f /= 4;
 
