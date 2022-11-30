@@ -57,6 +57,18 @@ public AudioClip clip;
     }
 
 
+
+float pitchFromStep( float step  ){
+    float p = Mathf.Pow( 1.05946f , (float)step );
+    return p;
+}
+
+
+float pitchFromPentScale( float step ){
+    float[] newStep = { 0,2,4,5,7 };
+    return pitchFromStep(newStep[(int)step]);
+}
+
     // where we start playing our sample from ( in sample space)
     public int[] startTimeInClip;
  
@@ -69,6 +81,7 @@ public AudioClip clip;
     public float[] playbackSpeed;
 
     public bool[] toDestroy;
+    public bool[] inUse;
 
     public int maxGrains = 100;
     public int currentNumberGrains = 0;
@@ -80,6 +93,7 @@ public AudioClip clip;
         clipLengths = new int[maxGrains];
         clipStartPlayTime = new int[maxGrains];
         toDestroy = new bool[maxGrains];
+        inUse = new bool[maxGrains];
         playbackSpeed = new float[maxGrains];
 
         for( int i =0 ; i < maxGrains; i++ ){
@@ -87,6 +101,7 @@ public AudioClip clip;
             clipLengths[i] = 0;
             clipStartPlayTime[i] = 00;
             toDestroy[i] = false;
+            inUse[i] = false;
             playbackSpeed[i] = 1110;
         }
 
@@ -187,30 +202,72 @@ float  sampleGrain(int id , int channel){
 }
 
 
+// todo: this is v inefficient!
 void FlattenGrains(){
 
 
+    bool completed = false;
+    int i = 0;
+    while (completed == false) 
+    {
 
-bool completed = false;
-int i = 0;
-while (completed == false) 
-{
+        if( toDestroy[i] == true ){
+            removeGrain(i);
+            currentNumberGrains --;
+            i --;
+        }
+        i++;
 
-    if( toDestroy[i] == true ){
+        if( i == maxGrains ){
+            completed = true;
+        }
 
     }
-    i++;
-
-    if( i == maxGrains ){
-        completed = true;
-    }
-
 
 
 }
 
+void removeGrain(int id){
+    
+    if( id == maxGrains-1 ){
+        toDestroy[id] = false;
+        inUse[id] = false;
+        clipLengths[id] = 0; 
+        clipStartPlayTime[id] = 0;
+        startTimeInClip[id] = 0;
+        playbackSpeed[id] = 1110;
+    }else{
+
+        toDestroy[id] = false;
+        inUse[id] = false;
+        clipLengths[id] = 0; 
+        clipStartPlayTime[id] = 0;
+        startTimeInClip[id] = 0;
+        playbackSpeed[id] = 1110;
+
+        for( int j = id; j<maxGrains-1; j++){  
+            inUse[j] = inUse[j+1]; 
+            toDestroy[j] = toDestroy[j+1]; 
+            clipLengths[j] =clipLengths[j+1];  
+            clipStartPlayTime[j] =clipStartPlayTime[j+1]; 
+            startTimeInClip[j] =startTimeInClip[j+1]; 
+            playbackSpeed[j] =playbackSpeed[j+1]; 
+        }
 
 
+        toDestroy[maxGrains-1] = false;
+        inUse[maxGrains-1] = false;
+        clipLengths[maxGrains-1] = 0; 
+        clipStartPlayTime[maxGrains-1] = 0;
+        startTimeInClip[maxGrains-1] = 0;
+        playbackSpeed[maxGrains-1] = 1110;
+
+    }
+
+
+}
+
+/*
 
 for( int j = 0; j< currentNumberGrains; j++ ){
           
@@ -242,6 +299,8 @@ for( int j = 0; j< currentNumberGrains; j++ ){
 
     }
 }
+*/
+
 
     void MakeNewGrain(){
 
@@ -253,13 +312,18 @@ for( int j = 0; j< currentNumberGrains; j++ ){
 
                 clipLengths[currentNumberGrains] = (int)((grainSize + Random.Range(-grainSizeRandomness,grainSizeRandomness)) * (float)sampleRate); // just making it 1 second to start!
 
-                playbackSpeed[currentNumberGrains] = grainPlaybackRate + Random.Range(-grainPlaybackRateRandomness,grainPlaybackRateRandomness);
+               // playbackSpeed[currentNumberGrains] = grainPlaybackRate + Random.Range(-grainPlaybackRateRandomness,grainPlaybackRateRandomness);
+                
+                
+                playbackSpeed[currentNumberGrains] = grainPlaybackRate + pitchFromPentScale(Random.Range(0,4));
             
                 clipStartPlayTime[currentNumberGrains] = timeIndex; // start playing now!
                 
                 
                 startTimeInClip[currentNumberGrains] = (int)( (playbackLocation + Random.Range(-playbackLocationRandomness,playbackLocationRandomness)) * (float)sampleRate);// Random.Range( 0, totalClipSamples/2 - (int)((float)clipLengths[currentNumberGrains]*2 * playbackSpeed[currentNumberGrains])); // starting at 0 to test!
 
+                toDestroy[currentNumberGrains] = false;
+                inUse[currentNumberGrains] = true;
                 
                 currentNumberGrains ++;
 
